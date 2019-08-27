@@ -1,10 +1,8 @@
 package com.tyk.demo.test;
 
 import com.tyk.demo.DemoApplication;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
+import org.activiti.engine.*;
+import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.Test;
@@ -27,23 +25,39 @@ public class VerySimpleLeaveProcessTest {
     public void testStartProcess() {
         //创建流程引擎
         ProcessEngine processEngine = ProcessEngineConfiguration
-                .createStandaloneProcessEngineConfiguration()
+                .createProcessEngineConfigurationFromResource("activiti.cfg.xml")
                 .buildProcessEngine();
 
+//        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
         //部署
         RepositoryService repositoryService = processEngine.getRepositoryService();
-        String bpmnFileName = "/diagram/leaveProcess.bpmn";
+        String bpmnFileName = "diagram/leaveProcess.bpmn";
+//        repositoryService.createDeployment()
+//                .addInputStream("leaveProcess",
+//                        this.getClass().getClassLoader().getResourceAsStream(bpmnFileName))
+//                .deploy();
+
         repositoryService.createDeployment()
-                .addInputStream("sayHelloToLeave",
-                        this.getClass().getClassLoader().getResourceAsStream(bpmnFileName))
+                .name("helloWorld")
+                .addClasspathResource("diagram/leaveProcess.bpmn")
+                .addClasspathResource("diagram/leaveProcess.png")
                 .deploy();
+
+//            	  Deployment deployment= processEngine.getRepositoryService()//与流程定义与部署对象相关的service
+//                                 .createDeployment()
+//                                 .name("HelloWorld入门程序")//创建一个部署对象
+//                                 .addClasspathResource("MyLeave.bpmn")//从classpath资源中加载，一次只能加载一个文件
+//                                 .addClasspathResource("ActivitiHelloWorld.png")
+//                                 .deploy();//完成部署
+//             System.out.println("部署ID:"+deployment.getId());
+//             System.out.println("部署名字："+deployment.getName());
 
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().singleResult();
         System.out.println("流程Key：" + processDefinition.getKey());
 
         //定义运行时，开启流程实例
         RuntimeService runtimeService = processEngine.getRuntimeService();
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("sayHelloToLeave");
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("myProcess");
 
         System.out.println("pid:" + processInstance.getId() + ",pdid:" + processInstance.getProcessDefinitionId());
 
